@@ -1,0 +1,73 @@
+# SPEC-PLAT-06 R76/R77 (ADR-017): environment-specific values come ONLY from the environment; the service refuses to
+# start naming every missing variable (gc.required-properties). Variables: .env.example.
+gc.required-properties: >-
+  spring.datasource.url, spring.datasource.username, spring.datasource.password,
+  spring.security.oauth2.resourceserver.jwt.issuer-uri, spring.security.oauth2.resourceserver.jwt.jwk-set-uri,
+  gc.security.internal-clients
+
+server:
+  port: ${SERVER_PORT:8085}
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  application:
+    name: notification-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_APP_USER}
+    password: ${DB_APP_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      connection-timeout: 3000
+  flyway:
+    enabled: ${GC_MIGRATE:false}
+    user: ${DB_OWNER_USER:}
+    password: ${DB_OWNER_PASSWORD:}
+    schemas: notify
+    default-schema: notify
+    create-schemas: true
+    locations: classpath:db/migration
+    placeholders:
+      app_role: ${spring.datasource.username}
+
+springdoc:
+  api-docs:
+    enabled: ${GC_API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${GC_API_DOCS_ENABLED:false}
+  paths-to-exclude: /dev/**                   # SPEC-NOT-01 §3: the dev mailbox is not part of the contract
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+# ---------------------------------------------------------------- security: service clients only (SPEC-NOT-01 R7)
+spring.security.oauth2.resourceserver.jwt:
+  issuer-uri: ${OIDC_ISSUER_URI}
+  jwk-set-uri: ${OIDC_JWKS_URI}
+  audiences: gc-api,gc-internal
+gc.security:
+  internal-clients: ${GC_INTERNAL_CLIENTS}
+  cors-allowed-origins: ${GC_CORS_ALLOWED_ORIGINS:}
+
+# ---------------------------------------------------------------- providers (SPEC-NOT-01 D2, D3)
+# Local: GC_DEV_MAILBOX=true and every provider "mailbox" (messages are stored, not sent). The mailbox can never be
+# combined with a real provider; real providers are later adapters behind the same ports.
+gc.notification:
+  dev-mailbox: ${GC_DEV_MAILBOX:false}
+  sms-provider: ${GC_SMS_PROVIDER:}
+  whatsapp-provider: ${GC_WHATSAPP_PROVIDER:}
+  email-provider: ${GC_EMAIL_PROVIDER:}

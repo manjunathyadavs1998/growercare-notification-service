@@ -1,6 +1,6 @@
 # SPEC-NOT-01: Message dispatch, provider ports and the dev mailbox
 - **Requirements:** NOT-1 (SMS / WhatsApp / email), IAM-1/IAM-5 (OTP delivery), PRV-5, Phase 1 PRD journeys J1/J2 and decision **D2** (messages stubbed locally)
-- **Status:** Agreed
+- **Status:** Implemented
 - **Owner:** notification-service (new repository `growercare-notification-service`, port 8085)
 - **Follow-up:** SPEC-NOT-02 — case and comment notifications from events (PRD J7: batching, quiet hours, recipient resolution)
 

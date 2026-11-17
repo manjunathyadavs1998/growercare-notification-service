@@ -1,0 +1,12 @@
+# Test values for the environment variables application.yml reads (SPEC-PLAT-06 R77). Tests override the database
+# with Testcontainers and decode JWTs with TestJwts.
+DB_URL: jdbc:postgresql://set-by-testcontainers.invalid/none
+DB_APP_USER: set-by-testcontainers
+DB_APP_PASSWORD: set-by-testcontainers
+OIDC_ISSUER_URI: http://issuer.test.invalid/realms/growercare
+OIDC_JWKS_URI: http://issuer.test.invalid/realms/growercare/protocol/openid-connect/certs
+GC_INTERNAL_CLIENTS: grower-service
+GC_DEV_MAILBOX: "true"
+GC_SMS_PROVIDER: mailbox
+GC_WHATSAPP_PROVIDER: mailbox
+GC_EMAIL_PROVIDER: mailbox
