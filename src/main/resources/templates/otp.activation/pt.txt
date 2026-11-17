@@ -1,0 +1,1 @@
+GrowerCare: seu código de verificação é {code}. Ele é válido por {minutes} minutos. Não o compartilhe com ninguém.

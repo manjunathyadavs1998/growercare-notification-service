@@ -1,0 +1,103 @@
+{
+  "components" : {
+    "schemas" : {
+      "Accepted" : {
+        "properties" : {
+          "messageId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "SendMessage" : {
+        "properties" : {
+          "category" : {
+            "type" : "string"
+          },
+          "channel" : {
+            "type" : "string"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "params" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "recipient" : {
+            "type" : "string"
+          },
+          "template" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      }
+    },
+    "securitySchemes" : {
+      "bearer" : {
+        "bearerFormat" : "JWT",
+        "description" : "Keycloak access token (audience gc-api)",
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    }
+  },
+  "info" : {
+    "description" : "GrowerCare notification-service. Errors are RFC 9457 problem+json; IDs are strings.",
+    "title" : "notification-service",
+    "version" : "v1"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/internal/messages" : {
+      "post" : {
+        "operationId" : "send",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Idempotency-Key",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SendMessage"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Send a message (SPEC-NOT-01 R1)",
+        "tags" : [ "message-controller" ]
+      }
+    }
+  },
+  "security" : [ {
+    "bearer" : [ ]
+  } ],
+  "servers" : [ {
+    "description" : "Generated server url",
+    "url" : "http://localhost"
+  } ]
+}

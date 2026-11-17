@@ -1,0 +1,16 @@
+# Runs this service as a container on the growercare-local-platform network (ADR-017).
+#   1. growercare-local-platform: docker compose up -d --wait
+#   2. here: cp .env.example .env && mvn -B package jib:dockerBuild -DskipTests && docker compose up -d
+services:
+  notification-service:
+    image: ghcr.io/manjunathyadavs1998/notification-service:${IMAGE_TAG:-1.0.0-SNAPSHOT}
+    container_name: gc-notification
+    env_file: .env                     # the ONLY configuration input (SPEC-PLAT-06 R77)
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: growercare
+    external: true
