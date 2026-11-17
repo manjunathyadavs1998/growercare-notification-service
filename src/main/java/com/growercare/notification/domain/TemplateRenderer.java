@@ -30,7 +30,7 @@ public final class TemplateRenderer {
         return new TemplateRenderer(TemplateRenderer.class.getClassLoader());
     }
 
-    /** @throws BusinessRuleException {@code notification.template-unknown | language-missing | param-missing} */
+    /** Renders a template; refuses (422) with {@code notification.template-unknown | language-missing | param-missing}. */
     public String render(String template, String language, Map<String, String> params) {
         if (template == null || !TEMPLATE_NAME.matcher(template).matches() || !exists(template + "/en.txt")) {
             throw new BusinessRuleException("notification.template-unknown", "Unknown template");

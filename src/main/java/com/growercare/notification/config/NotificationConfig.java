@@ -59,8 +59,7 @@ public class NotificationConfig {
     @Bean
     @Order(1)
     SecurityFilterChain devMailboxChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/dev/**")
-                .csrf(c -> c.disable())
+        http.securityMatcher("/dev/**")                 // GET only; CSRF protection stays on (it only guards unsafe methods)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(h -> h.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'")))
                 .authorizeHttpRequests(a -> a.anyRequest().permitAll());
