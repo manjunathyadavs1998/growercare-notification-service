@@ -18,7 +18,8 @@ import java.util.Objects;
  */
 public record GrowerWindow(Instant windowEndsAt, int pendingCount, GrowerNotice pending, Instant dueAt, int batchSeq) {
 
-    public static final Duration LENGTH = Duration.ofMinutes(5);
+    /** The spec's window (D5); environments may shorten it (D9, {@link NoticePolicy}). */
+    public static final Duration LENGTH = NoticePolicy.DEFAULT.window();
 
     /** What to do with a new notice: send it now, and the window afterwards. */
     public record Step(boolean sendNow, GrowerWindow next) { }
@@ -30,20 +31,25 @@ public record GrowerWindow(Instant windowEndsAt, int pendingCount, GrowerNotice 
         }
     }
 
-    /** @param current the case's window, or null before its first notice */
+    /** With the spec's defaults (5 minutes, quiet hours on). */
     public static Step onNotice(GrowerWindow current, GrowerNotice notice, Instant now, ZoneId zone) {
+        return onNotice(current, notice, now, zone, NoticePolicy.DEFAULT);
+    }
+
+    /** @param current the case's window, or null before its first notice */
+    public static Step onNotice(GrowerWindow current, GrowerNotice notice, Instant now, ZoneId zone, NoticePolicy policy) {
         Objects.requireNonNull(notice, "notice");
         int seq = current == null ? 0 : current.batchSeq;
         boolean held = current != null && (current.pendingCount > 0 || now.isBefore(current.windowEndsAt));
         if (!held) {
-            var earliest = QuietHours.earliestSend(now, zone);
+            var earliest = policy.earliestSend(now, zone);
             if (!earliest.isAfter(now)) {
-                return new Step(true, new GrowerWindow(now.plus(LENGTH), 0, null, null, seq));
+                return new Step(true, new GrowerWindow(now.plus(policy.window()), 0, null, null, seq));
             }
             return new Step(false, new GrowerWindow(current == null ? now : current.windowEndsAt, 1, notice, earliest, seq));
         }
         var due = current.pendingCount > 0 ? current.dueAt
-                : QuietHours.earliestSend(current.windowEndsAt.isAfter(now) ? current.windowEndsAt : now, zone);
+                : policy.earliestSend(current.windowEndsAt.isAfter(now) ? current.windowEndsAt : now, zone);
         return new Step(false, new GrowerWindow(current.windowEndsAt, current.pendingCount + 1, notice, due, seq));
     }
 
@@ -61,7 +67,11 @@ public record GrowerWindow(Instant windowEndsAt, int pendingCount, GrowerNotice 
 
     /** After a release at {@code now}: nothing waits and a new window starts. */
     public GrowerWindow released(Instant now) {
-        return new GrowerWindow(now.plus(LENGTH), 0, null, null, batchSeq + 1);
+        return released(now, NoticePolicy.DEFAULT);
+    }
+
+    public GrowerWindow released(Instant now, NoticePolicy policy) {
+        return new GrowerWindow(now.plus(policy.window()), 0, null, null, batchSeq + 1);
     }
 
     /** The release failed (a dependency was down): try again at {@code at}. */

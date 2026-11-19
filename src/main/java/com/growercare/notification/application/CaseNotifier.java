@@ -10,6 +10,7 @@ import com.growercare.notification.domain.GrowerWindow;
 import com.growercare.notification.domain.MessageRequest;
 import com.growercare.notification.domain.MessageRequest.Category;
 import com.growercare.notification.domain.MessageRequest.Channel;
+import com.growercare.notification.domain.NoticePolicy;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -64,9 +65,10 @@ public class CaseNotifier {
     private final Clock clock;
     private final MeterRegistry meters;
     private final TransactionTemplate tx;
+    private final NoticePolicy policy;
 
     public CaseNotifier(CaseNoticeStore store, ContactDirectory contacts, MessageDispatch dispatch, Links links, Clock clock,
-                        MeterRegistry meters, TransactionTemplate tx) {
+                        MeterRegistry meters, TransactionTemplate tx, NoticePolicy policy) {
         this.store = store;
         this.contacts = contacts;
         this.dispatch = dispatch;
@@ -74,6 +76,7 @@ public class CaseNotifier {
         this.clock = clock;
         this.meters = meters;
         this.tx = tx;
+        this.policy = policy;
     }
 
     /** One event, first delivery. Must run inside the transaction that recorded it in the inbox. */
@@ -98,7 +101,7 @@ public class CaseNotifier {
                 Boolean done = tx.execute(status -> store.lockDueWindow(caseId, now).map(window -> {
                     var ref = store.caseRef(caseId).orElseThrow(() -> new IllegalStateException("window without case_ref " + caseId));
                     sendToGrower(ref, window.release(), key("batch:" + caseId + ":" + window.batchSeq()));
-                    store.saveWindow(caseId, window.released(now));
+                    store.saveWindow(caseId, window.released(now, policy));
                     return true;
                 }).orElse(false));
                 released += Boolean.TRUE.equals(done) ? 1 : 0;
@@ -119,7 +122,7 @@ public class CaseNotifier {
             return;
         }
         var step = GrowerWindow.onNotice(store.lockWindow(caseId).orElse(null), notice, clock.instant(),
-                store.timeZone(ref.get().countryCode()));
+                store.timeZone(ref.get().countryCode()), policy);
         if (step.sendNow() && !sendToGrower(ref.get(), notice, key("grower:" + event.eventId()))) {
             return;                                                                                         // R48: no contact, no window
         }

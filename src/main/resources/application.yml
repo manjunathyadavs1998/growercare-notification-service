@@ -116,3 +116,5 @@ gc.case-notices:
   staff-app-url: ${GC_STAFF_APP_URL}            # the assignment email links to the staff console
   release-enabled: ${GC_CASE_NOTICE_RELEASE_ENABLED:true}
   release-interval-ms: ${GC_CASE_NOTICE_RELEASE_INTERVAL_MS:15000}
+  window: ${GC_CASE_NOTICE_WINDOW:PT5M}                 # D9: the spec's 5 minutes; the local stack shortens it
+  quiet-hours: ${GC_CASE_NOTICE_QUIET_HOURS:true}       # D9: 21:00-07:00 country time; the local stack switches it off

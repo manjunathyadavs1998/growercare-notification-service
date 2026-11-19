@@ -3,6 +3,7 @@ package com.growercare.notification.config;
 import com.growercare.notification.adapters.out.contacts.HttpContactDirectory;
 import com.growercare.notification.application.CaseNotifier;
 import com.growercare.notification.application.port.ContactDirectory;
+import com.growercare.notification.domain.NoticePolicy;
 import java.time.Clock;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,13 @@ public class CaseNoticesConfig {
     @Bean
     Clock clock() {
         return Clock.systemUTC();
+    }
+
+    /** D9 / R51: the spec's values unless the environment shortens the window or switches quiet hours off (local stack). */
+    @Bean
+    NoticePolicy noticePolicy(@Value("${gc.case-notices.window:PT5M}") Duration window,
+                              @Value("${gc.case-notices.quiet-hours:true}") boolean quietHours) {
+        return new NoticePolicy(window, quietHours);
     }
 
     @Bean
