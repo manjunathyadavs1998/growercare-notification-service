@@ -10,3 +10,13 @@ GC_DEV_MAILBOX: "true"
 GC_SMS_PROVIDER: mailbox
 GC_WHATSAPP_PROVIDER: mailbox
 GC_EMAIL_PROVIDER: mailbox
+KAFKA_BOOTSTRAP_SERVERS: kafka.test.invalid:9092
+GC_EVENTS_CONSUMERS_ENABLED: "false"
+GROWER_BASE_URL: http://grower.test.invalid
+IAM_BASE_URL: http://iam.test.invalid
+OIDC_TOKEN_URI: http://issuer.test.invalid/realms/growercare/protocol/openid-connect/token
+SERVICE_CLIENT_ID: notification-service
+SERVICE_CLIENT_SECRET: test-secret
+GC_GROWER_APP_URL: http://grower-app.test
+GC_STAFF_APP_URL: http://staff-app.test
+GC_CASE_NOTICE_RELEASE_ENABLED: "false"

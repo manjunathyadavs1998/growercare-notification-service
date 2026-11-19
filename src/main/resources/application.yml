@@ -3,7 +3,10 @@
 gc.required-properties: >-
   spring.datasource.url, spring.datasource.username, spring.datasource.password,
   spring.security.oauth2.resourceserver.jwt.issuer-uri, spring.security.oauth2.resourceserver.jwt.jwk-set-uri,
-  gc.security.internal-clients
+  gc.security.internal-clients, spring.kafka.bootstrap-servers, gc.grower.base-url, gc.iam.base-url,
+  spring.security.oauth2.client.registration.notification-service.client-id,
+  spring.security.oauth2.client.registration.notification-service.client-secret,
+  spring.security.oauth2.client.provider.keycloak.token-uri, gc.case-notices.grower-app-url, gc.case-notices.staff-app-url
 
 server:
   port: ${SERVER_PORT:8085}
@@ -71,3 +74,45 @@ gc.notification:
   sms-provider: ${GC_SMS_PROVIDER:}
   whatsapp-provider: ${GC_WHATSAPP_PROVIDER:}
   email-provider: ${GC_EMAIL_PROVIDER:}
+
+# ---------------------------------------------------------------- case notifications (SPEC-NOT-02)
+spring.kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+  consumer:
+    auto-offset-reset: earliest
+    enable-auto-commit: false
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  producer:   # DLQ only
+    acks: all
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+gc.events:
+  consumers-enabled: ${GC_EVENTS_CONSUMERS_ENABLED:true}
+  case-topic: case.case.events
+  retry-initial-backoff: 1s
+
+# D4: contacts are read at send time with notification-service's own client-credentials token (audience gc-internal).
+spring.security.oauth2.client:
+  registration:
+    notification-service:
+      provider: keycloak
+      client-id: ${SERVICE_CLIENT_ID}
+      client-secret: ${SERVICE_CLIENT_SECRET}
+      authorization-grant-type: client_credentials
+  provider:
+    keycloak:
+      token-uri: ${OIDC_TOKEN_URI}
+
+# Other services, reached only over the network (SPEC-PLAT-06 R75).
+gc.grower:
+  base-url: ${GROWER_BASE_URL}
+gc.iam:
+  base-url: ${IAM_BASE_URL}
+
+gc.case-notices:
+  grower-app-url: ${GC_GROWER_APP_URL}          # D7: messages link to GC_GROWER_APP_URL/cases/{id}
+  staff-app-url: ${GC_STAFF_APP_URL}            # the assignment email links to the staff console
+  release-enabled: ${GC_CASE_NOTICE_RELEASE_ENABLED:true}
+  release-interval-ms: ${GC_CASE_NOTICE_RELEASE_INTERVAL_MS:15000}
