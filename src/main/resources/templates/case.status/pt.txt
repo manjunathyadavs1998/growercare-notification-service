@@ -1,0 +1,1 @@
+GrowerCare: situação do seu caso: {status}. Detalhes: {link}

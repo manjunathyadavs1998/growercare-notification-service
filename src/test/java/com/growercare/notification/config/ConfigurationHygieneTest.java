@@ -24,7 +24,8 @@ class ConfigurationHygieneTest {
     static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{([A-Z][A-Z0-9_]*)(:[^}]*)?}");
     /** Variables that are environment-specific: never a default in application.yml. */
     static final Pattern ENVIRONMENT_SPECIFIC = Pattern.compile("^(DB_URL|DB_APP_USER|DB_APP_PASSWORD|GC_CDC_ROLE|OIDC_.*|"
-            + "GC_INTERNAL_CLIENTS|IAM_.*|REDIS_HOST|REDIS_PASSWORD)$");
+            + "GC_INTERNAL_CLIENTS|IAM_.*|REDIS_HOST|REDIS_PASSWORD|KAFKA_BOOTSTRAP_SERVERS|GROWER_BASE_URL|SERVICE_CLIENT_.*|"
+            + "GC_GROWER_APP_URL|GC_STAFF_APP_URL)$");
     /** Empty in AWS (regional endpoint + IRSA): may default to empty, never to a value. */
     static final Pattern AWS_OPTIONAL = Pattern.compile("^S3_(ENDPOINT|PUBLIC_ENDPOINT|ACCESS_KEY|SECRET_KEY)$");
 
