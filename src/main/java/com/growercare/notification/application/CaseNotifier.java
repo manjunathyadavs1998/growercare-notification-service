@@ -82,11 +82,11 @@ public class CaseNotifier {
         if ("case.created".equals(event.type())) {                                                        // R40, D4
             store.saveCaseRef(new CaseRef(event.caseId(), event.id("growerId"), event.requiredText("countryCode")));
         }
-        switch (decision) {
-            case CaseNoticeRules.Nothing nothing -> { }
-            case CaseNoticeRules.ToAssignee assignee -> notifyAssignee(event, assignee.userId());
-            case CaseNoticeRules.ToGrower grower -> notifyGrower(event, grower.notice());
-        }
+        if (decision instanceof CaseNoticeRules.ToAssignee assignee) {
+            notifyAssignee(event, assignee.userId());
+        } else if (decision instanceof CaseNoticeRules.ToGrower grower) {
+            notifyGrower(event, grower.notice());
+        }                                                                                                   // Nothing: nobody is told
     }
 
     /** R45/R46: sends every due window; a window whose send fails is retried a minute later (R48). */

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -59,6 +60,8 @@ class GrowerWindowTest {
             window = step.next();
         }
         assertThat(sent).isEqualTo(expected.sentAtOnce());
+        assertThat(window).isNotNull();
+        window = Objects.requireNonNull(window);
         if (expected.dueAt() == null) {
             assertThat(window.pendingCount()).isZero();
             return;

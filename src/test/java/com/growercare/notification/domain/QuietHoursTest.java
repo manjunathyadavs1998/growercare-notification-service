@@ -23,6 +23,6 @@ class QuietHoursTest {
             """)
     void earliestSend(String example, String zone, LocalDateTime local, LocalDateTime expected) {
         var z = ZoneId.of(zone);
-        assertThat(QuietHours.earliestSend(local.atZone(z).toInstant(), z)).isEqualTo(expected.atZone(z).toInstant());
+        assertThat(QuietHours.earliestSend(local.atZone(z).toInstant(), z)).as(example).isEqualTo(expected.atZone(z).toInstant());
     }
 }
